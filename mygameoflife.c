@@ -4,17 +4,16 @@
 
 #define WIDTH 10
 #define HEIGHT 10
-
 int numberOfNeighbours(unsigned grid[WIDTH][HEIGHT], int x, int y);
 
 void seed (unsigned grid[WIDTH][HEIGHT]) {
     int x, y;
     for (x = 0; x < WIDTH; x++) {
         for (y = 0; y < HEIGHT; y++) {
-            grid[x][y] = rand() < RAND_MAX / 10 ? 1 : 0;
+            grid[x][y] = rand() < RAND_MAX / 3 ? 1 : 0;
         }
     }
-}
+   }
 
 void show (unsigned grid[WIDTH][HEIGHT]) {
     int x, y;
@@ -33,18 +32,31 @@ void evolve (unsigned grid[WIDTH][HEIGHT]) {
     for (x = 0; x < WIDTH; x++) {
         for (y = 0; y < HEIGHT; y++) {
            neighbours = numberOfNeighbours(grid, x, y); 
-           printf("%d , %d has %d neighbours \n", x, y, neighbours);
+           if (neighbours < 2)
+                gridcopy[x][y] = 0;    
+           else if (grid[x][y] && (neighbours == 2 || neighbours == 3))
+               gridcopy[x][y] = 1;
+           else if (neighbours > 3)
+               gridcopy[x][y] = 0;
+           else if (grid[x][y] == 0 && neighbours == 3) 
+               gridcopy[x][y] = 1;
+           else 
+               gridcopy[x][y] = grid[x][y];
         }
+    }
+
+    for (int i = 0; i < WIDTH; ++i) {
+        for (int j = 0; j < HEIGHT; ++j)
+            grid[i][j] = gridcopy[i][j];
     }
 }
 
 int numberOfNeighbours(unsigned grid[WIDTH][HEIGHT], int x, int y) {
-
     int dead = (grid[x][y] == 0 ) ? 0 : 1;
     int neighbours = 0;
     //Edge cases
     //Top left
-    if (dead == 0) {
+    if (x == 0 && y == 0) {
         if (grid[x+1][y] == 1) 
             neighbours++;
         if (grid[x][y-1] == 1)
@@ -125,7 +137,7 @@ int numberOfNeighbours(unsigned grid[WIDTH][HEIGHT], int x, int y) {
 
     
     // Top
-    if ( x != 0 && x != WIDTH && y == 0)
+    if (x != 0 && x != WIDTH && y == 0)
     {
         if (grid[x-1][y] == 1)
             neighbours++;
@@ -139,17 +151,54 @@ int numberOfNeighbours(unsigned grid[WIDTH][HEIGHT], int x, int y) {
             neighbours++;
     }
     
+    if (x != 0 && x != WIDTH && y != 0 && y != HEIGHT) 
+    {
+        if (grid[x-1][y] == 1)
+            neighbours++;
+        if (grid[x-1][y-1] == 1)
+            neighbours++;
+        if (grid[x-1][y+1] == 1)
+            neighbours++;
+        if (grid[x][y-1] == 1) 
+            neighbours++;
+        if (grid[x][y+1] == 1)
+            neighbours++;
+        if (grid[x+1][y] == 1)
+            neighbours++;
+        if (grid[x+1][y-1] == 1)
+            neighbours++;
+        if (grid[x+1][y+1] == 1)
+            neighbours++;
+    }
+
+
     return neighbours;
 }
 
-void game (int w, int h) {
-    unsigned grid[w][h];
+void game () {
+    unsigned grid[WIDTH][HEIGHT];
     seed(grid);
-    show(grid);
-    evolve(grid);
+        //Glider
+/*         = {{0,0,1,0,0,0,0,0,0,0},
+            {0,0,0,1,0,0,0,0,0,0},
+            {0,1,1,1,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0}};
+            */
+    while (1) {
+        show(grid);
+        printf("\n\n");
+        evolve(grid);
+        sleep(1);
+    }
 }
 
 int main () {
     int w = 10, h = 10;
-    game(w, h);
+        game();
 }
